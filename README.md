@@ -33,20 +33,25 @@ Estudantes do ensino médio, técnico ou superior que desejam organizar e planej
 
 ## Estrutura do Projeto
 
+```
 study-planner/
-├── src/
-│   ├── main/java/br/com/andremarchi/
-│   │   ├── menu/OrganizadorDeEstudos.java
-│   │   └── service/TempoEstudos.java
-│   └── test/java/br/com/andremarchi/service/
-│       └── TempoEstudosTest.java
 ├── .github/
 │   └── workflows/
 │       └── ci.yml
-├── checkstyle.xml
-├── pom.xml
+├── src/
+│   ├── main/java/br/com/andremarchi/
+│   │   ├── menu/
+│   │   │   └── OrganizadorDeEstudos.java
+│   │   └── service/
+│   │       └── TempoEstudos.java
+│   └── test/java/br/com/andremarchi/service/
+│       └── TempoEstudosTest.java
 ├── .gitignore
+├── checkstyle.xml
+├── LICENSE
+├── pom.xml
 └── README.md
+```
 
 ## Instalação
 
