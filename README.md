@@ -92,6 +92,8 @@ mvn checkstyle:check
 ## Exemplo de Uso
 
 ==============================
+
+```
 PLANEJADOR DE ESTUDOS
 Modelo de estudo: Pomodoro
 Hora de início dos estudos: 8
@@ -114,6 +116,7 @@ Tempo total de pausas: 30 minutos
 Tempo real de estudo: 210 minutos (3,50 horas)
 Cada disciplina terá aproximadamente 105 minutos.
 Parabéns! Você terá um ótimo tempo de estudo.
+```
 
 ## Versão
 
