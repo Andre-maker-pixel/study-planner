@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/Andre-maker-pixel/study-planner/actions/workflows/ci.yml/badge.svg)](https://github.com/Andre-maker-pixel/study-planner/actions/workflows/ci.yml)
 
+[![Deploy](https://img.shields.io/badge/deploy-GitHub%20Pages-blue)](https://andre-maker-pixel.github.io/study-planner)
+
 ## Problema Real
 
 Muitos estudantes têm dificuldade em estruturar sua rotina de estudos de forma eficiente. Sem planejamento claro, é comum subestimar o tempo disponível, não contabilizar as pausas e chegar ao fim do dia sem saber quanto tempo foi realmente dedicado a cada matéria.
