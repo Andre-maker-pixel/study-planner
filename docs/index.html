@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Study Planner</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a202c; min-height: 100vh; }
+    header { background: #1a237e; color: white; padding: 2rem; text-align: center; }
+    header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    header p { opacity: 0.85; font-size: 1rem; }
+    .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
+    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .card h2 { font-size: 1.1rem; color: #1a237e; margin-bottom: 1rem; border-bottom: 2px solid #e8eaf6; padding-bottom: 0.5rem; }
+    label { display: block; font-size: 0.85rem; color: #4a5568; margin-bottom: 0.25rem; margin-top: 0.75rem; }
+    input { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 0.95rem; }
+    button { width: 100%; margin-top: 1.25rem; padding: 0.75rem; background: #1a237e; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+    button:hover { background: #283593; }
+    .resultado { display: none; }
+    .resultado h2 { color: #1a237e; }
+    .stat { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.95rem; }
+    .stat span:last-child { font-weight: 600; color: #1a237e; }
+    .motivacao { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; }
+    .motivacao.ok { background: #e8f5e9; color: #2e7d32; }
+    .motivacao.alerta { background: #fff3e0; color: #e65100; }
+    .feriados-box { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .feriados-box h2 { font-size: 1.1rem; color: #1a237e; margin-bottom: 1rem; border-bottom: 2px solid #e8eaf6; padding-bottom: 0.5rem; }
+    .feriado-item { padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; display: flex; justify-content: space-between; }
+    .feriado-item:last-child { border-bottom: none; }
+    .tag-feriado { background: #fce4ec; color: #c62828; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; }
+    .carregando { color: #888; font-size: 0.9rem; font-style: italic; }
+    footer { text-align: center; padding: 2rem; color: #718096; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📚 Study Planner</h1>
+  <p>Organize sua rotina de estudos e fique por dentro dos feriados da semana</p>
+</header>
+
+<div class="container">
+
+  <div class="feriados-box">
+    <h2>🗓️ Feriados Nacionais desta Semana</h2>
+    <div id="feriados-lista"><p class="carregando">Consultando feriados...</p></div>
+  </div>
+
+  <div class="card">
+    <h2>📝 Planejar Sessão de Estudos</h2>
+
+    <label>Modelo de estudo (ex: Pomodoro)</label>
+    <input type="text" id="modelo" placeholder="Ex: Pomodoro" />
+
+    <label>Hora de início</label>
+    <input type="number" id="inicio" min="0" max="23" placeholder="Ex: 8" />
+
+    <label>Hora de término</label>
+    <input type="number" id="fim" min="0" max="23" placeholder="Ex: 12" />
+
+    <label>Quantidade de pausas</label>
+    <input type="number" id="pausas" min="0" placeholder="Ex: 2" />
+
+    <label>Minutos por pausa</label>
+    <input type="number" id="minPausa" min="0" placeholder="Ex: 15" />
+
+    <label>Disciplinas (separadas por vírgula)</label>
+    <input type="text" id="disciplinas" placeholder="Ex: Matemática, Física, História" />
+
+    <button onclick="calcular()">Calcular minha rotina</button>
+  </div>
+
+  <div class="card resultado" id="resultado">
+    <h2>📊 Sua Rotina</h2>
+    <div id="stats"></div>
+    <div id="motivacao" class="motivacao"></div>
+  </div>
+
+</div>
+
+<footer>Study Planner v1.0.0 — André Marchi · <a href="https://github.com/Andre-maker-pixel/study-planner">GitHub</a></footer>
+
+<script>
+  async function carregarFeriados() {
+    const lista = document.getElementById('feriados-lista');
+    try {
+      const ano = new Date().getFullYear();
+      const res = await fetch(`https://brasilapi.com.br/api/feriados/v1/${ano}`);
+      if (!res.ok) throw new Error('Erro na API');
+      const feriados = await res.json();
+
+      const hoje = new Date();
+      const inicioSemana = new Date(hoje);
+      inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+      const fimSemana = new Date(inicioSemana);
+      fimSemana.setDate(inicioSemana.getDate() + 6);
+
+      const ferriadosSemana = feriados.filter(f => {
+        const d = new Date(f.date + 'T12:00:00');
+        return d >= inicioSemana && d <= fimSemana;
+      });
+
+      if (ferriadosSemana.length === 0) {
+        lista.innerHTML = '<p style="color:#4caf50; font-size:0.9rem;">✅ Nenhum feriado nacional esta semana. Bons estudos!</p>';
+      } else {
+        lista.innerHTML = ferriadosSemana.map(f => {
+          const d = new Date(f.date + 'T12:00:00');
+          const dia = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' });
+          return `<div class="feriado-item"><span>${f.name}</span><span class="tag-feriado">${dia}</span></div>`;
+        }).join('');
+      }
+    } catch (e) {
+      lista.innerHTML = '<p style="color:#e53935; font-size:0.9rem;">⚠️ Não foi possível carregar os feriados.</p>';
+    }
+  }
+
+  function calcular() {
+    const modelo = document.getElementById('modelo').value.trim();
+    const inicio = parseFloat(document.getElementById('inicio').value);
+    const fim = parseFloat(document.getElementById('fim').value);
+    const pausas = parseInt(document.getElementById('pausas').value) || 0;
+    const minPausa = parseInt(document.getElementById('minPausa').value) || 0;
+    const disciplinasRaw = document.getElementById('disciplinas').value.trim();
+
+    if (!modelo || isNaN(inicio) || isNaN(fim) || fim <= inicio || !disciplinasRaw) {
+      alert('Preencha todos os campos corretamente. A hora de término deve ser maior que a de início.');
+      return;
+    }
+
+    const disciplinas = disciplinasRaw.split(',').map(d => d.trim()).filter(d => d);
+    const minutosTotais = (fim - inicio) * 60;
+    const tempoTotalPausas = pausas * minPausa;
+    const minutosEstudo = minutosTotais - tempoTotalPausas;
+    const horasEstudo = (minutosEstudo / 60).toFixed(2);
+    const tempoPorDisciplina = (minutosEstudo / disciplinas.length).toFixed(0);
+
+    document.getElementById('stats').innerHTML = `
+      <div class="stat"><span>Modelo</span><span>${modelo}</span></div>
+      <div class="stat"><span>Horário</span><span>${inicio}h às ${fim}h</span></div>
+      <div class="stat"><span>Pausas</span><span>${pausas}x de ${minPausa} min</span></div>
+      <div class="stat"><span>Tempo total disponível</span><span>${minutosTotais} min</span></div>
+      <div class="stat"><span>Tempo total de pausas</span><span>${tempoTotalPausas} min</span></div>
+      <div class="stat"><span>Tempo real de estudo</span><span>${minutosEstudo} min (${horasEstudo}h)</span></div>
+      <div class="stat"><span>Disciplinas</span><span>${disciplinas.join(', ')}</span></div>
+      <div class="stat"><span>Tempo por disciplina</span><span>~${tempoPorDisciplina} min</span></div>
+    `;
+
+    const motDiv = document.getElementById('motivacao');
+    if (parseFloat(horasEstudo) >= 4) {
+      motDiv.className = 'motivacao ok';
+      motDiv.textContent = '🎉 Parabéns! Você terá um ótimo tempo de estudo.';
+    } else {
+      motDiv.className = 'motivacao alerta';
+      motDiv.textContent = '💡 Tente aumentar um pouco seu tempo de estudo para render mais.';
+    }
+
+    document.getElementById('resultado').style.display = 'block';
+  }
+
+  carregarFeriados();
+</script>
+
+</body>
+</html>
