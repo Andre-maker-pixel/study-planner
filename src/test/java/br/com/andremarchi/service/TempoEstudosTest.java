@@ -71,4 +71,20 @@ class TempoEstudosTest {
         assertEquals("Matemática", rotina.disciplinas[0]);
         assertEquals("Português", rotina.disciplinas[1]);
     }
+
+    @Test
+    void deveReceberRespostaDaApiFeriados() throws Exception {
+        int ano = java.time.LocalDate.now().getYear();
+        String url = "https://brasilapi.com.br/api/feriados/v1/" + ano;
+
+        java.net.HttpURLConnection con = (java.net.HttpURLConnection)
+            new java.net.URL(url).openConnection();
+        con.setRequestMethod("GET");
+        con.setConnectTimeout(5000);
+        con.setReadTimeout(5000);
+
+        int status = con.getResponseCode();
+
+        assertEquals(200, status, "A API de feriados deve retornar HTTP 200");
+    }
 }
